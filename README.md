@@ -27,10 +27,29 @@ After completing this guide, you'll be able to:
 
 ## Prerequisites
 
-### Next.js and Modern Frontend Development
+### Frameworks and Libraries
 
-This tutorial uses [Next.js]. You don't need to be an expert, but it's helpful to be comfortable with development using a current React framework. You'll be on your own to select and use a package manager, manage Node versions, and other frontend environment tasks. If you don't have your own preference, you can just follow along with us and use [npm].
+Smart Contract Layer:
+- [Foundry](https://book.getfoundry.sh/getting-started/installation)
+- [OpenZeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts/tree/master)
 
+Frontend Layer:
+- [Node.js](https://nodejs.org/en/download) v23.3.0
+- npm v11.2.0 (included with Node.js)
+- [Next.js](https://nextjs.org/docs/app/getting-started/installation) v15.2.2
+- next-themes v0.4.6
+- React v18.2.0 (included with Node.js)
+- tanstack/react-query v5.67.3
+- radix-ui/react-slot v1.1.2
+- Lucide React v0.300.0
+- [shadcn](https://ui.shadcn.com/docs/installation/next) v2.3.0
+- [Tailwind](https://tailwindcss.com/docs/installation/tailwind-cli) CSS v3.4.1
+- [Viem](https://viem.sh/docs/getting-started.html) v2.23.10
+- [Wagmi](https://wagmi.sh/react/installation) v2.14.13
+- [ConnectKit](https://docs.family.co/connectkit/getting-started) v1.8.2
+
+Optional:
+- vercel/blob v0.27.3 (handling file uploads and storage with Vercel Blob which v0.dev uses)
 
 ### Tools and Accounts
 
@@ -139,6 +158,9 @@ Now we'll build a React frontend to interact with our smart contract.
 
 1. Create a `frontend` folder in the project root
 2. Initialize a Next.js project with the necessary dependencies:
+```CLI
+npx create-react-app frontend
+```
    - Next.js 15
    - React
    - Tailwind CSS 3.4
