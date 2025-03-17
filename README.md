@@ -156,8 +156,9 @@ Now we'll build a React frontend to interact with our smart contract.
 
 ### Setting Up the Project
 
-1. Create a `frontend` folder in the project root
-2. Initialize a Next.js project with the necessary dependencies:
+1. Create a basic frontend using [v0.dev](v0.dev) 
+2. Create a `frontend` folder in the project root
+3. Initialize a Next.js project with the necessary dependencies:
 ```CLI
 npx create-react-app frontend
 ```
@@ -178,6 +179,8 @@ Organize the frontend with the following structure:
 1. `/src/components`: UI components and Web3 integrations
 2. `/src/app`: Page layouts and routing
 3. `/src/lib`: Contract interfaces and chain configuration
+
+Then we will grab the main files from v0.dev and import them into our frontend directory, making sure the correct files go into the corresponding folders.
 
 ### Implementing Web3 Connectivity
 

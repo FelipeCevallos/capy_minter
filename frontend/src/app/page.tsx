@@ -92,7 +92,7 @@ export default function Home() {
               <p className="text-pink-300 text-sm">Total Supply</p>
             </div>
             <div className="bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-cyan-500/30">
-              <p className="text-2xl font-bold text-white">0.01 ETH</p>
+              <p className="text-2xl font-bold text-white">0.01 FLOW</p>
               <p className="text-cyan-300 text-sm">Mint Price</p>
             </div>
           </div>
