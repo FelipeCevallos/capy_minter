@@ -1,0 +1,15 @@
+# Foundry
+cache/
+out/
+broadcast/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+node_modules/
+.DS_Store 

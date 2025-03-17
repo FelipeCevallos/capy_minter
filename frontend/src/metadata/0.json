@@ -1,0 +1,9 @@
+{
+    "name": "Hoverboard Legend #0",
+    "description": "A vaporwave hoverboard capybara",
+    "image": "https://ipfs.io/ipfs/bafybeihcxvkqjl76rv4ot5ome6o2rrlxjdovbqycnwbbhjgomsnaudalmy",
+    "attributes": [
+      {"trait_type": "Chillness", "value": "90"},
+      {"trait_type": "Coolness", "value": "100"}
+    ]
+  }
