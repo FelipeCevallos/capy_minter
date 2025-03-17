@@ -12,10 +12,26 @@ import { createPublicClient, http } from "viem"
 import { sepolia } from "viem/chains"
 import { flowEvmTestnet } from "@/lib/chains"
 
+// IPFS Gateway URLs
+const IPFS_GATEWAY = "https://ipfs.io/ipfs/"
+
+// The base CID for the metadata folder
+const METADATA_CID = "bafybeibqerz6c7rt76iqdvxidci44nl56k5k2u4l7kbfsheox5vrlzu7f4"
+
+// Type for NFT metadata
+type NFTMetadata = {
+  name: string;
+  description: string;
+  image: string;
+  attributes: { trait_type: string; value: string }[];
+}
+
 export default function MintPage() {
   const { address, isConnected } = useAccount()
   const [mintedNFT, setMintedNFT] = useState<number | null>(null)
   const [showCongrats, setShowCongrats] = useState(false)
+  const [nftMetadata, setNftMetadata] = useState<NFTMetadata[]>([])
+  const [loading, setLoading] = useState(true)
 
   // Check if user has minted
   const { data: balance } = useReadContract({
@@ -24,6 +40,37 @@ export default function MintPage() {
     functionName: 'balanceOf',
     args: [address || '0x0000000000000000000000000000000000000000'],
   })
+
+  // Fetch metadata for all NFTs
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      setLoading(true);
+      try {
+        const metadata: NFTMetadata[] = [];
+        
+        // Fetch metadata for all 5 NFTs
+        for (let i = 0; i < 5; i++) {
+          const metadataUrl = `${IPFS_GATEWAY}${METADATA_CID}/${i}.json`;
+          const response = await fetch(metadataUrl);
+          
+          if (response.ok) {
+            const data = await response.json();
+            metadata.push(data);
+          } else {
+            console.error(`Failed to fetch metadata for token ${i}`);
+          }
+        }
+        
+        setNftMetadata(metadata);
+      } catch (error) {
+        console.error("Error fetching metadata:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchMetadata();
+  }, []);
 
   // Get user's NFT if they have one
   useEffect(() => {
@@ -57,146 +104,90 @@ export default function MintPage() {
     checkUserNFT()
   }, [isConnected, address, balance])
 
+  // Helper function to get image URL from IPFS or use placeholder
+  const getImageUrl = (imageUrl: string) => {
+    if (!imageUrl) return "/placeholder.svg";
+    
+    // If it's already a valid URL, use it
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    
+    // If it's an IPFS URI, convert it to a gateway URL
+    if (imageUrl.startsWith('ipfs://')) {
+      return imageUrl.replace('ipfs://', IPFS_GATEWAY);
+    }
+    
+    return "/placeholder.svg";
+  };
+
   // Simplified collection data
   const nftCollection = {
     name: "Vaporwave Capybaras",
-    image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.57.03%20-%20A%20futuristic%20vaporwave%20capybara%20in%20a%20desert%20landscape.%20The%20capybara%20has%20neon-colored%20cybernetic%20enhancements%20and%20wears%20stylish%20retro-futuristic%20sungla-4t4zmrYBCQDRKtBBNX8LWkeNQiIt4d.png",
+    image: nftMetadata[2]?.image 
+      ? getImageUrl(nftMetadata[2].image) 
+      : "/placeholder.svg",
   }
 
-  // NFT preview images
-  const nftPreviews = [
-    {
-      id: 0,
-      name: "#001 Hoverboard Legend",
-      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.53.57%20-%20A%20futuristic%20capybara%20in%20a%20vaporwave%20style%2C%20sitting%20on%20a%20hoverboard%20with%20neon%20underglow%2C%20wearing%20a%20metallic%20jacket%20and%20holographic%20visor.%20Background%20f-x2hyLehXKRw2B0NuoJmxRjo2UitahB.png"
-    },
-    {
-      id: 1,
-      name: "#002 So Chill",
-      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.52.25%20-%20A%20futuristic%20capybara%20in%20a%20vaporwave%20vibe%2C%20wearing%20neon%20sunglasses%20and%20a%20cybernetic%20headset%2C%20surrounded%20by%20glowing%20palm%20trees%2C%20purple%20and%20pink%20neon%20li-bsLBY0OJgxLUllMTVNXxfrMdAyrI3F.png"
-    },
-    {
-      id: 2,
-      name: "#003 Desert Wanderer",
-      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.57.03%20-%20A%20futuristic%20vaporwave%20capybara%20in%20a%20desert%20landscape.%20The%20capybara%20has%20neon-colored%20cybernetic%20enhancements%20and%20wears%20stylish%20retro-futuristic%20sungla-4t4zmrYBCQDRKtBBNX8LWkeNQiIt4d.png"
-    },
-    {
-      id: 3,
-      name: "#004 DJ Capybara",
-      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.54.07%20-%20A%20futuristic%20capybara%20DJ%20in%20a%20vaporwave%20club%2C%20wearing%20neon%20headphones%20and%20spinning%20a%20holographic%20record.%20Surrounded%20by%20glowing%20pink%20and%20blue%20lights%2C%20w-vbWYtwdrY7mUwvl1uW3Hski4hKzJ1r.png"
-    },
-    {
-      id: 4,
-      name: "#005 Mate Mystic",
-      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.58.17%20-%20A%20futuristic%20vaporwave%20capybara%20in%20a%20desert%20landscape%2C%20drinking%20mate%20%28Argentinian%20tea%29.%20The%20capybara%20has%20neon-colored%20cybernetic%20enhancements%20and%20wear-xvnncOBk6lrkV7jwPHJAD2vAkn9Hc8.png"
-    }
-  ]
+  // NFT preview images from metadata
+  const nftPreviews = nftMetadata.map((metadata, index) => ({
+    id: index,
+    name: metadata.name || `#00${index + 1}`,
+    image: getImageUrl(metadata.image),
+    description: metadata.description || ""
+  }));
 
   // Get the latest token ID from the contract
   const getLatestTokenId = async () => {
     try {
       const publicClient = createPublicClient({
         chain: flowEvmTestnet,
-        transport: http(process.env.NEXT_PUBLIC_FLOW_EVM_TESTNET_RPC_URL),
+        transport: http(process.env.NEXT_PUBLIC_FLOW_EVM_TESTNET_RPC_URL || 'https://flow-testnet.g.alchemy.com/v2/xFnKwKEtyR6uS7CZ2KO_SRt28lVJU9YC'),
       });
-      
-      // Get total supply to determine the latest token ID
+
       const totalSupply = await publicClient.readContract({
         address: contractAddress as `0x${string}`,
         abi: contractABI,
         functionName: 'totalSupply',
       });
-      
-      // In most NFT contracts, token IDs start from 0, so the latest is totalSupply - 1
-      const latestTokenId = Number(totalSupply) - 1;
-      
-      // Verify this token belongs to the user
-      const owner = await publicClient.readContract({
-        address: contractAddress as `0x${string}`,
-        abi: contractABI,
-        functionName: 'ownerOf',
-        args: [BigInt(latestTokenId)],
-      }) as `0x${string}`;
-      
-      if (owner && address && owner.toLowerCase() === address.toLowerCase()) {
-        return latestTokenId;
-      }
-      
-      return null;
+
+      return Number(totalSupply) - 1;
     } catch (error) {
       console.error("Error getting latest token ID:", error);
       return null;
     }
   };
 
-  // Listen for mint success from MintNFT component
-  const onMintSuccess = async () => {
-    setShowCongrats(true);
-    
-    // Try to get the latest token ID immediately
-    const latestTokenId = await getLatestTokenId();
-    if (latestTokenId !== null) {
-      setMintedNFT(latestTokenId);
+  // Handle successful mint
+  const onMintSuccess = async (tokenId?: number) => {
+    if (tokenId !== undefined) {
+      setMintedNFT(tokenId);
     } else {
-      // Fallback to checking all tokens
-      checkUserNFT();
-    }
-    
-    // Double-check after a delay to ensure blockchain data is updated
-    setTimeout(async () => {
-      if (isConnected && address) {
-        const delayedTokenId = await getLatestTokenId();
-        if (delayedTokenId !== null) {
-          setMintedNFT(delayedTokenId);
-        } else {
-          checkUserNFT();
-        }
+      // Try to get the latest token ID
+      const latestTokenId = await getLatestTokenId();
+      if (latestTokenId !== null) {
+        setMintedNFT(latestTokenId);
       }
-    }, 3000);
+    }
+    setShowCongrats(true);
   };
 
-  // Function to check user's NFT
-  const checkUserNFT = async () => {
-    if (isConnected && address) {
-      try {
-        const maxTokens = 5;
-        
-        for (let tokenId = 0; tokenId < maxTokens; tokenId++) {
-          try {
-            const ownerResponse = await fetch(`/api/ownerOf?tokenId=${tokenId}`)
-              .then(res => res.json())
-              .catch(() => ({ owner: null }))
-
-            if (ownerResponse.owner && ownerResponse.owner.toLowerCase() === address.toLowerCase()) {
-              setMintedNFT(tokenId)
-              break
-            }
-          } catch (error) {
-            console.log(`Token ${tokenId} check failed:`, error)
-          }
-        }
-      } catch (error) {
-        console.error("Error checking user NFT:", error)
-      }
-    }
-  }
-
-  // Get the total supply to determine the latest token ID
+  // Get total supply
   const { data: totalSupply } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi: contractABI,
     functionName: 'totalSupply',
   });
 
-  // When total supply changes, check if we need to update the minted NFT
+  // Check if all NFTs are minted
+  const allMinted = totalSupply ? Number(totalSupply) >= 5 : false;
+
+  // Scroll to top when congrats is shown
   useEffect(() => {
-    if (totalSupply && showCongrats && mintedNFT === null) {
-      // If we're showing congrats but don't have a minted NFT yet, try to get it
-      getLatestTokenId().then(tokenId => {
-        if (tokenId !== null) {
-          setMintedNFT(tokenId);
-        }
+    if (showCongrats) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
       });
     }
   }, [totalSupply, showCongrats, mintedNFT]);
@@ -268,21 +259,28 @@ export default function MintPage() {
             <p className="text-cyan-300 font-medium">Preview All Capybaras</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {nftPreviews.map((nft) => (
-              <div key={nft.id} className="relative aspect-square rounded-lg overflow-hidden border-2 border-cyan-400/50 transform hover:-translate-y-1 transition-all duration-300">
-                <Image
-                  src={nft.image}
-                  alt={nft.name}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                  <p className="text-white font-bold">{nft.name}</p>
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {nftPreviews.map((nft) => (
+                <div key={nft.id} className="relative aspect-square rounded-lg overflow-hidden border-2 border-cyan-400/50 transform hover:-translate-y-1 transition-all duration-300">
+                  <Image
+                    src={nft.image}
+                    alt={nft.name}
+                    fill
+                    className="object-cover"
+                    unoptimized={true} // Skip optimization for IPFS images
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <p className="text-white font-bold">{nft.name}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="mt-8 max-w-2xl mx-auto">
             <p className="text-white/70 text-sm">

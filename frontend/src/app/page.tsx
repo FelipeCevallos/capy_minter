@@ -63,8 +63,7 @@ export default function Home() {
               className="object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-              <p className="text-white font-bold">Desert Wanderer #003</p>
-              <p className="text-cyan-300 text-sm">Desert Collection</p>
+              <p className="text-white font-bold">Desert Wanderer #2</p>
             </div>
           </div>
 
@@ -76,8 +75,7 @@ export default function Home() {
               className="object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-              <p className="text-white font-bold">DJ Capyvara #04</p>
-              <p className="text-cyan-300 text-sm">Music Collection</p>
+              <p className="text-white font-bold">DJ Capybara #3</p>
             </div>
           </div>
 
@@ -89,8 +87,7 @@ export default function Home() {
               className="object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-              <p className="text-white font-bold">Mate Mystic #05</p>
-              <p className="text-cyan-300 text-sm">Chill Collection</p>
+              <p className="text-white font-bold">Mate Mystic #4</p>
             </div>
           </div>
         </div>

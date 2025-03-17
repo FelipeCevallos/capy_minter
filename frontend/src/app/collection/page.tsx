@@ -21,6 +21,12 @@ type NFT = {
   traits: { trait_type: string; value: string }[]
 }
 
+// IPFS Gateway URLs
+const IPFS_GATEWAY = "https://ipfs.io/ipfs/"
+
+// The base CID for the metadata folder
+const METADATA_CID = "bafybeibqerz6c7rt76iqdvxidci44nl56k5k2u4l7kbfsheox5vrlzu7f4"
+
 export default function CollectionPage() {
   const { address, isConnected, chainId } = useAccount()
   const [userNFTs, setUserNFTs] = useState<NFT[]>([])
@@ -116,19 +122,44 @@ export default function CollectionPage() {
             if (owner && owner.toString().toLowerCase() === address.toLowerCase()) {
               console.log(`User owns token ${tokenId}`);
               
-              // For this demo, we'll use mock data instead of fetching from IPFS
-              const nft: NFT = {
-                id: tokenId,
-                name: `Vaporwave Capybara #${tokenId + 1}`,
-                description: "A unique Vaporwave Capybara NFT from the CapyMinter collection",
-                image: getNftImage(tokenId),
-                traits: [
-                  { trait_type: "Collection", value: "Vaporwave Capybaras" },
-                  { trait_type: "Rarity", value: "Rare" },
-                ],
-              };
-
-              userTokens.push(nft);
+              try {
+                // Construct the metadata URL using the correct IPFS path
+                const metadataUrl = `${IPFS_GATEWAY}${METADATA_CID}/${tokenId}.json`;
+                console.log(`Fetching metadata from: ${metadataUrl}`);
+                
+                const response = await fetch(metadataUrl);
+                
+                if (!response.ok) {
+                  throw new Error(`Failed to fetch metadata: ${response.statusText}`);
+                }
+                
+                const metadata = await response.json();
+                console.log(`Metadata for token ${tokenId}:`, metadata);
+                
+                // Create NFT object from metadata
+                const nft: NFT = {
+                  id: tokenId,
+                  name: metadata.name || `NFT #${tokenId}`,
+                  description: metadata.description || "A unique NFT from the collection",
+                  image: metadata.image || "", // The image URL is already a full URL in the metadata
+                  traits: metadata.attributes || [],
+                };
+                
+                userTokens.push(nft);
+              } catch (error) {
+                console.error(`Error fetching metadata for token ${tokenId}:`, error);
+                // Fallback to basic data if metadata fetch fails
+                const nft: NFT = {
+                  id: tokenId,
+                  name: `NFT #${tokenId}`,
+                  description: "A unique NFT from the collection",
+                  image: "/placeholder.svg",
+                  traits: [
+                    { trait_type: "Token ID", value: tokenId.toString() },
+                  ],
+                };
+                userTokens.push(nft);
+              }
             }
           } catch (error) {
             console.log(`Token ${tokenId} check failed:`, error);
@@ -146,18 +177,6 @@ export default function CollectionPage() {
 
     fetchUserNFTs()
   }, [isConnected, address, balance, maxSupply, isWrongNetwork, chainId])
-
-  // Helper function to get NFT image based on token ID
-  const getNftImage = (tokenId: number) => {
-    const images = [
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.53.57%20-%20A%20futuristic%20capybara%20in%20a%20vaporwave%20style%2C%20sitting%20on%20a%20hoverboard%20with%20neon%20underglow%2C%20wearing%20a%20metallic%20jacket%20and%20holographic%20visor.%20Background%20f-x2hyLehXKRw2B0NuoJmxRjo2UitahB.png",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.52.25%20-%20A%20futuristic%20capybara%20in%20a%20vaporwave%20vibe%2C%20wearing%20neon%20sunglasses%20and%20a%20cybernetic%20headset%2C%20surrounded%20by%20glowing%20palm%20trees%2C%20purple%20and%20pink%20neon%20li-bsLBY0OJgxLUllMTVNXxfrMdAyrI3F.png",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.57.03%20-%20A%20futuristic%20vaporwave%20capybara%20in%20a%20desert%20landscape.%20The%20capybara%20has%20neon-colored%20cybernetic%20enhancements%20and%20wears%20stylish%20retro-futuristic%20sungla-4t4zmrYBCQDRKtBBNX8LWkeNQiIt4d.png",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.54.07%20-%20A%20futuristic%20capybara%20DJ%20in%20a%20vaporwave%20club%2C%20wearing%20neon%20headphones%20and%20spinning%20a%20holographic%20record.%20Surrounded%20by%20glowing%20pink%20and%20blue%20lights%2C%20w-vbWYtwdrY7mUwvl1uW3Hski4hKzJ1r.png",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DALL%C2%B7E%202025-03-13%2011.58.17%20-%20A%20futuristic%20vaporwave%20capybara%20in%20a%20desert%20landscape%2C%20drinking%20mate%20%28Argentinian%20tea%29.%20The%20capybara%20has%20neon-colored%20cybernetic%20enhancements%20and%20wear-xvnncOBk6lrkV7jwPHJAD2vAkn9Hc8.png",
-    ]
-    return images[tokenId % images.length]
-  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-purple-900 via-pink-800 to-indigo-900 py-16 px-4">
@@ -302,7 +321,7 @@ function NftCard({ nft }: { nft: NFT }) {
     
     // If it's an IPFS URI, convert it to a gateway URL
     if (nft.image.startsWith('ipfs://')) {
-      return nft.image.replace('ipfs://', 'https://ipfs.io/ipfs/')
+      return nft.image.replace('ipfs://', IPFS_GATEWAY)
     }
     
     return "/placeholder.svg"
@@ -319,7 +338,7 @@ function NftCard({ nft }: { nft: NFT }) {
             fill 
             className="object-cover" 
             onError={() => setImgError(true)}
-            unoptimized={nft.image.includes('ipfs')} // Skip optimization for IPFS images
+            unoptimized={true} // Skip optimization for all images to ensure IPFS works correctly
             sizes="(max-width: 768px) 100vw, 50vw"
             priority
           />

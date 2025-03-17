@@ -11,7 +11,7 @@ import { createPublicClient, http } from 'viem';
 import { flowEvmTestnet } from '@/lib/chains';
 
 interface MintNFTProps {
-  onMintSuccess?: () => void;
+  onMintSuccess?: (tokenId?: number) => void;
 }
 
 export default function MintNFT({ onMintSuccess }: MintNFTProps) {
